@@ -93,35 +93,37 @@ def do_test(kiali_client, graph_params, yaml_file, badge):
     bookinfo_namespace = conftest.get_bookinfo_namespace()
     graph_params["namespaces"] = bookinfo_namespace
 
-    print("Debug: Start do_test: JSON: {}".format(get_graph_json(kiali_client, graph_params)))
+    print(
+        f"Debug: Start do_test: JSON: {get_graph_json(kiali_client, graph_params)}"
+    )
+
 
     count = get_badge_count(kiali_client, graph_params, badge)
 
     try:
-      assert command_exec.oc_apply(yaml_file, bookinfo_namespace) == True
+        assert command_exec.oc_apply(yaml_file, bookinfo_namespace) == True
 
-      try:
-        with timeout(seconds=60, error_message='Timed out waiting for Create'):
-          while True:
-              new_count = get_badge_count(kiali_client, graph_params, badge)
-              if new_count != 0 and new_count >= count:
-                  break
+        try:
+            with timeout(seconds=60, error_message='Timed out waiting for Create'):
+              while True:
+                  new_count = get_badge_count(kiali_client, graph_params, badge)
+                  if new_count != 0 and new_count >= count:
+                      break
 
-              time.sleep(1)
-      except:
-        print ("Timeout Exception - Nodes: {}".format(get_graph_json(kiali_client, graph_params)["elements"]['nodes']))
-        raise Exception("Timeout - Waiting for badge: {}".format(badge))
+                  time.sleep(1)
+        except:
+            print(
+                f"""Timeout Exception - Nodes: {get_graph_json(kiali_client, graph_params)["elements"]['nodes']}"""
+            )
+
+            raise Exception(f"Timeout - Waiting for badge: {badge}")
 
     finally:
-      assert command_exec.oc_delete(yaml_file, bookinfo_namespace) == True
+        assert command_exec.oc_delete(yaml_file, bookinfo_namespace) == True
 
-      with timeout(seconds=60, error_message='Timed out waiting for Delete'):
-          while True:
-              # Validate that JSON no longer has Virtual Service
-              if get_badge_count(kiali_client, graph_params, badge) <= count:
-                  break
-
-              time.sleep(1)
+        with timeout(seconds=60, error_message='Timed out waiting for Delete'):
+            while not get_badge_count(kiali_client, graph_params, badge) <= count:
+                time.sleep(1)
 
     return True
 

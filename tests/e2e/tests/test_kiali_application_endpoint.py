@@ -9,9 +9,9 @@ def test_application_list_endpoint(kiali_client):
     app_list = kiali_client.request(method_name='appList', path={'namespace': bookinfo_namespace, 'app': APPLICATION_TO_VALIDATE}).json()
     assert app_list != None
     for app in app_list.get('applications'):
-      assert app.get('name') != None and app.get('name') != ''
-      if 'traffic-generator' not in app.get('name'):
-        assert app.get('istioSidecar') == True
+        assert app.get('name') not in [None, '']
+        if 'traffic-generator' not in app.get('name'):
+          assert app.get('istioSidecar') == True
 
     assert app_list.get('namespace').get('name') == bookinfo_namespace
 

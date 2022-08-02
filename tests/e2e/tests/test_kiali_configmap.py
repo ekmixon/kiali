@@ -41,7 +41,8 @@ def _test_auth_openshift():
             new_configmap_file=conftest.NEW_CONFIG_MAP_FILE)
 
         # Create token cookie file
-        cmd = "curl -v -k POST -c {} -d 'access_token='$(oc whoami -t)'&expires_in=86400&scope=user%3Afull&token_type=Bearer' https://{}/api/authenticate".format(cookie_file,  kiali_hostname)
+        cmd = f"curl -v -k POST -c {cookie_file} -d 'access_token='$(oc whoami -t)'&expires_in=86400&scope=user%3Afull&token_type=Bearer' https://{kiali_hostname}/api/authenticate"
+
         with timeout(seconds=120, error_message='Timed out waiting getting token'):
             while True:
                 stdout, stderr = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE).communicate()
@@ -51,7 +52,7 @@ def _test_auth_openshift():
                 time.sleep(2)
 
         # Make the API request using token cookie
-        cmd = "curl -v -k -b {} https://{}/api/namespaces".format(cookie_file, kiali_hostname)
+        cmd = f"curl -v -k -b {cookie_file} https://{kiali_hostname}/api/namespaces"
         with timeout(seconds=120, error_message='Timed out waiting getting token'):
             while True:
                 stdout, stderr = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE).communicate()
@@ -60,7 +61,7 @@ def _test_auth_openshift():
 
                 time.sleep(2)
 
-        cmd = "rm -f {}".format(cookie_file)
+        cmd = f"rm -f {cookie_file}"
         Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE).communicate()
 
     finally:
@@ -79,7 +80,12 @@ def __test_change_web_root(kiali_client):
 
         with timeout(seconds=180, error_message='Timed out waiting for API call'):
             while True:
-                response = kiali_client.request(plain_url=new_web_root_value + "/api/namespaces", path=None, params=None)
+                response = kiali_client.request(
+                    plain_url=f"{new_web_root_value}/api/namespaces",
+                    path=None,
+                    params=None,
+                )
+
                 if response.status_code == 200:
                     break
 
@@ -102,7 +108,7 @@ def make_request(auth_type="auth"):
                                            swagger_address=conftest.get_kiali_swagger_address())
                 response = kiali_client.request(method_name='namespaceList', path=None, params=None)
             else:
-                assert False, "Error: Unsupported Auth Strategy Type: {}".format(auth_type)
+                assert False, f"Error: Unsupported Auth Strategy Type: {auth_type}"
 
             if response.status_code == 200:
                 break
@@ -129,17 +135,16 @@ def create_configmap_and_wait_for_kiali(configmap_file):
 
 def create_new_configmap_file(element_name, list, new_value, current_configmap_file_name, new_configmap_file):
 
-    current_configmap_file = open(current_configmap_file_name, "r")
-    new_configmap_file = open(new_configmap_file, "w")
+    with open(current_configmap_file_name, "r") as current_configmap_file:
+        new_configmap_file = open(new_configmap_file, "w")
 
-    for line in current_configmap_file:
-        if element_name in line:
-            for item in list:
-                if item in line:
-                    line = line.replace(item, new_value)
-                    break
+        for line in current_configmap_file:
+            if element_name in line:
+                for item in list:
+                    if item in line:
+                        line = line.replace(item, new_value)
+                        break
 
-        new_configmap_file.write(line)
+            new_configmap_file.write(line)
 
-    current_configmap_file.close()
     new_configmap_file.close()

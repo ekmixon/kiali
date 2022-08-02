@@ -7,4 +7,3 @@ for rLabel in rawLabels:
       if len(labels) > 0:
         labels+=','
       labels+=rLabel['name'].encode("utf-8")
-print labels

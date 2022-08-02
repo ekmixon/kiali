@@ -25,12 +25,17 @@ def test_service_graph_bookinfo_namespace_(kiali_client):
     # Validate Node count
     nodes = json.get('elements').get('nodes')
     #print ("Node count: {}".format(len(nodes)))
-    assert len(nodes) >=  BOOKINFO_EXPECTED_NODES, "Expected Nodes: {}   Actual Nodes, {}".format(BOOKINFO_EXPECTED_NODES, len(nodes))
+    assert (
+        len(nodes) >= BOOKINFO_EXPECTED_NODES
+    ), f"Expected Nodes: {BOOKINFO_EXPECTED_NODES}   Actual Nodes, {len(nodes)}"
+
 
     # validate edge count
     edges = json.get('elements').get('edges')
     #print ("Edge count: {}".format(len(edges)))
-    assert len(edges) >= BOOKINFO_EXPECTED_EDGES, "Expected Edges: {}   Actual Edges, {}".format(BOOKINFO_EXPECTED_EDGES, len(nodes))
+    assert (
+        len(edges) >= BOOKINFO_EXPECTED_EDGES
+    ), f"Expected Edges: {BOOKINFO_EXPECTED_EDGES}   Actual Edges, {len(nodes)}"
 
 def get_graph_json(kiali_client):
     PARAMS['namespaces']=conftest.get_bookinfo_namespace()

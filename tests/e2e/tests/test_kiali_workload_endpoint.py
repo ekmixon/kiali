@@ -6,7 +6,7 @@ from utils.timeout import timeout
 
 WORKLOAD_TO_VALIDATE = 'details-v1'
 WORKLOAD_TYPE = 'Deployment'
-EXTRA_WORKLOADS = set(['details-v2', 'reviews-v4'])
+EXTRA_WORKLOADS = {'details-v2', 'reviews-v4'}
 
 METRICS_PARAMS = {"direction": "outbound", "reporter": "destination"}
 
@@ -16,12 +16,12 @@ def test_workload_list_endpoint(kiali_client):
     workload_list = kiali_client.request(method_name='workloadList', path={'namespace': bookinfo_namespace}).json()
     assert workload_list != None
     for workload in workload_list.get('workloads'):
-      assert workload != None
-      assert workload.get('name') != None and workload.get('name') != ''
-      if ('traffic-generator' not in workload.get('name')):
-          assert workload.get('istioSidecar') == True
-          assert workload.get('versionLabel') == True
-      assert workload.get('appLabel') == True
+        assert workload != None
+        assert workload.get('name') not in [None, '']
+        if ('traffic-generator' not in workload.get('name')):
+            assert workload.get('istioSidecar') == True
+            assert workload.get('versionLabel') == True
+        assert workload.get('appLabel') == True
 
 def test_diversity_in_workload_list_endpoint(kiali_client):
   bookinfo_namespace = conftest.get_bookinfo_namespace()

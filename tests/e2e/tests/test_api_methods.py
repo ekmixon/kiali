@@ -23,7 +23,6 @@ def before_all_tests(kiali_client):
     global swagger_method_list, tested_method_list, control_plane_namespace
     control_plane_namespace = conftest.get_control_plane_namespace()
     swagger = kiali_client.swagger_parser.swagger
-    swagger_method_list= []
     tested_method_list = ['root','jaegerInfo', 'grafanaInfo', 'getPermissions', 'getStatus', 'getConfig', 'authenticate',
                           'namespaceList', 'namespaceMetrics','namespaceHealth','istioStatus',
                           'istioConfigList', 'istioConfigDetails', 'istioConfigCreate', 'istioConfigDelete', 'objectValidations', ''
@@ -36,8 +35,7 @@ def before_all_tests(kiali_client):
                           'namespaceTls', 'getThreeScaleInfo', 'getThreeScaleHandlers', 'getThreeScaleService',
                           'meshTls', 'namespaceValidations', 'appSpans', 'appTraces', 'serviceTraces', 'workloadSpans', 'workloadTraces', 'serviceSpans']
 
-    for key in swagger.operation:
-        swagger_method_list.append(key)
+    swagger_method_list = list(swagger.operation)
 
 
 
@@ -60,14 +58,12 @@ def __test_swagger_coverage():
     difference_set = set(swagger_method_list) - set(tested_method_list)
     if len(difference_set) > 0:
         pytest.fail('Missing {0} Api Methods to Validate:'.format(str(len(difference_set))) + str(difference_set))
-    else:
-        pass
 
 def test_swagger_double_api(kiali_client):
     swagger = kiali_client.swagger_parser.swagger
 
     for key, value in swagger.operation.items():
-        assert not 'api/api' in value[0]
+        assert 'api/api' not in value[0]
 
 def test_root(kiali_client):
     common_utils.get_response(kiali_client, method_name='root')
@@ -222,8 +218,8 @@ def test_graph_app_and_graph_app_version(kiali_client):
     GRAPH_APP_PARAMS_VERSION = {'graphType': 'versionedApp'}
     GRAPH_APP_PARAMS_WORKLOAD = {'graphType': 'workload'}
     GRAPH_APP_PARAMS_SERVICE = {'graphType': 'service'}
-    
-    
+
+
     GRAPH_APP_PATH = {'namespace': 'bookinfo', 'app': 'reviews'}
 
     for method_name in ['graphApp', 'graphAppVersion']:
@@ -306,7 +302,7 @@ def test_workload_spans_list(kiali_client):
 
 
 def test_invalid_versioned_app_graphnamespaces_negative_400(kiali_client):
-    
+
     INVALID_VERSIONED_APP_DURATION_GRAPHNAMESPACES  =   {'graphType': 'versionedApp', 'duration': 'invalid',  'namespaces':'bookinfo'}
     INVALID_VERSIONED_APP_NAMESPACE_GRAPHNAMESPACES =   {'graphType': 'versionedApp', 'duration': '60s',  'namespaces':'invalid'} 
     INVALID_VERSIONED_APP_DURATION_NAMESPACE_GRAPHNAMESPACES =   {'graphType': 'versionedApp', 'duration': 'invalid',  'namespaces':'invalid'} 
@@ -316,7 +312,7 @@ def test_invalid_versioned_app_graphnamespaces_negative_400(kiali_client):
     common_utils.get_response(kiali_client, method_name='graphNamespaces', path=INVALID_VERSIONED_APP_DURATION_NAMESPACE_GRAPHNAMESPACES, status_code_expected=400)
     
 def test_invalid_app_graphnamespaces_negative_400(kiali_client):
-    
+
     INVALID_APP_DURATION_GRAPHNAMESPACES  =   {'graphType': 'app', 'duration': 'invalid',  'namespaces':'bookinfo'}
     INVALID_APP_NAMESPACE_GRAPHNAMESPACES =   {'graphType': 'app', 'duration': '60s',  'namespaces':'invalid'} 
     INVALID_APP_DURATION_NAMESPACE_GRAPHNAMESPACES =   {'graphType': 'app', 'duration': 'invalid',  'namespaces':'invalid'} 
@@ -326,7 +322,7 @@ def test_invalid_app_graphnamespaces_negative_400(kiali_client):
     common_utils.get_response(kiali_client, method_name='graphNamespaces', path=INVALID_APP_DURATION_NAMESPACE_GRAPHNAMESPACES, status_code_expected=400)
 
 def test_invalid_service_graphnamespaces_negative_400(kiali_client):
-    
+
     INVALID_SERVICE_DURATION_GRAPHNAMESPACES  =   {'graphType': 'service', 'duration': 'invalid',  'namespaces':'bookinfo'}
     INVALID_SERVICE_NAMESPACE_GRAPHNAMESPACES =   {'graphType': 'service', 'duration': '60s',  'namespaces':'invalid'} 
     INVALID_SERVICE_DURATION_NAMESPACE_GRAPHNAMESPACES =   {'graphType': 'service', 'duration': 'invalid',  'namespaces':'invalid'} 

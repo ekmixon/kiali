@@ -14,7 +14,7 @@ def test_external_host_node(kiali_client):
 
         PARAMS['namespaces']=conftest.get_bookinfo_namespace()
 
-        with timeout(seconds=360, error_message='Timed out waiting for \"{}\"'.format(EXPECTED_EXTERNAL_SERVICE_NAME)):
+        with timeout(seconds=360, error_message=f'Timed out waiting for \"{EXPECTED_EXTERNAL_SERVICE_NAME}\"'):
             wiat_for = True
             while wiat_for:
                 response = kiali_client.request(method_name='graphNamespaces', params=PARAMS)

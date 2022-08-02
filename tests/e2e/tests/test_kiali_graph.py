@@ -215,7 +215,7 @@ def get_graph_json(client, params):
 
 def validate_responce(json, params):
     for key, value in params.items():
-        if key == 'duration' or key == 'rate':
+        if key in ['duration', 'rate']:
             assert str(json.get(key)) in str(re.sub("[^0-9]", "", value))
         elif key != 'refresh':
             assert json.get(key) == json.get(key)

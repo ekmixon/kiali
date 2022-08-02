@@ -9,16 +9,19 @@ from pkg_resources import resource_string
 from urllib.request import urlopen
 
 CONFIG_PATH = '../config'
-ENV_FILE = CONFIG_PATH + '/env.yaml'
+ENV_FILE = f'{CONFIG_PATH}/env.yaml'
 ASSETS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../assets')
-CIRCUIT_BREAKER_FILE = ASSETS_PATH + '/bookinfo-reviews-all-cb.yaml'
-VIRTUAL_SERVICE_FILE = ASSETS_PATH + '/bookinfo-ratings-delay.yaml'
-WORKLOADS_FILE = ASSETS_PATH  + '/bookinfo-workloads.yaml'
-EXTERNAL_HOST_SERVICE_FILE = ASSETS_PATH  + '//bookinfo-ext-service-entry.yaml'
-TRAFFIC_SHIFTING_FILE = ASSETS_PATH + '/bookinfo-traffic-shifting-reviews.yaml'
-TCP_TRAFFIC_SHIFTING_FILE = ASSETS_PATH + '/bookinfo-tcp-traffic-shifting-reviews.yaml'
-REQUEST_ROUTING_FILE = ASSETS_PATH + '/bookinfo-request-timeouts-reviews.yaml'
-FAULT_INJECTION_FILE = ASSETS_PATH + '/bookinfo-fault-injection-reviews.yaml'
+CIRCUIT_BREAKER_FILE = f'{ASSETS_PATH}/bookinfo-reviews-all-cb.yaml'
+VIRTUAL_SERVICE_FILE = f'{ASSETS_PATH}/bookinfo-ratings-delay.yaml'
+WORKLOADS_FILE = f'{ASSETS_PATH}/bookinfo-workloads.yaml'
+EXTERNAL_HOST_SERVICE_FILE = f'{ASSETS_PATH}//bookinfo-ext-service-entry.yaml'
+TRAFFIC_SHIFTING_FILE = f'{ASSETS_PATH}/bookinfo-traffic-shifting-reviews.yaml'
+TCP_TRAFFIC_SHIFTING_FILE = (
+    f'{ASSETS_PATH}/bookinfo-tcp-traffic-shifting-reviews.yaml'
+)
+
+REQUEST_ROUTING_FILE = f'{ASSETS_PATH}/bookinfo-request-timeouts-reviews.yaml'
+FAULT_INJECTION_FILE = f'{ASSETS_PATH}/bookinfo-fault-injection-reviews.yaml'
 
 CURRENT_CONFIGMAP_FILE = './current_kiali_configmap.yaml'
 NEW_CONFIG_MAP_FILE = './new_kiali_configmap.yaml'
@@ -44,21 +47,20 @@ def __get_kiali_client__(config):
 
 def __get_environment_config__(env_file):
     yamlfile = resource_string(__name__, env_file)
-    config = yaml.safe_load(yamlfile)
-    return config
+    return yaml.safe_load(yamlfile)
 
 
 def __remove_assets():
-  print('Cleanning up (Note: ignore messages: "Error from server (NotFound))": ')
-  namespace = get_bookinfo_namespace()
-  file_count = 0
-  for root, dirs, files in os.walk(ASSETS_PATH):
-    file_count = len(files)
+    print('Cleanning up (Note: ignore messages: "Error from server (NotFound))": ')
+    namespace = get_bookinfo_namespace()
+    file_count = 0
+    for root, dirs, files in os.walk(ASSETS_PATH):
+        file_count = len(files)
 
-    for name in files:
-      command_exec.oc_delete(ASSETS_PATH + "/" + name, namespace)
+        for name in files:
+            command_exec.oc_delete(f"{ASSETS_PATH}/{name}", namespace)
 
-  print('Assets deleted: {}'.format(file_count))
+    print(f'Assets deleted: {file_count}')
 
 def get_istio_clusterrole_file():
     file = __get_environment_config__(ENV_FILE).get('istio_clusterrole')
